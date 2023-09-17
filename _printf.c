@@ -1,109 +1,49 @@
-#ifndef _PRINTF_H
-#define _PRINTF_H
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <limits.h>
-#include <stdlib.h>
-
-#define OUTPUT_BUFFER_SIZE 1024
-#define BUFFER_FLUSH -1
-
-
-#define NULL_STRING "(null)"
-
-#define PARAMS_INIT {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-
-#define CONV_LOWER	1
-#define CONV_UNSIGNED	2
+#include "main.h"
 
 /**
- * struct parameters - parameters struct
+ * _printf - prints anything
+ * @format: the format string
  *
- * @unSign: flag if unsigned value
- *
- * @plusFlag: on if plus_flag specified
- * @spaceFlag: on if space_flag specified
- * @hashtagFlaglag: on if _flag specified
- * @zeroFlag: on if zero_flag specified
- * @minusFlag: on if minus_flag specified
- *
- * @width: field width specified
- * @precision: field precision specified
- *
- * @hModifier: on if hModifier is specified
- * @lModifier: on if lModifier is specified
- *
+ * Return: number of bytes printed
  */
-typedef struct parameters
+int _printf(const char *format, ...)
 {
-	unsigned int unSign			: 1;
+	int total = 0;
+	va_list ap;
+	char *p, *start;
+	params_t params = PARAMS_INIT;
 
-	unsigned int plusFlag		: 1;
-	unsigned int spaceFlag		: 1;
-	unsigned int hashtagFlag	: 1;
-	unsigned int zeroFlag		: 1;
-	unsigned int minusFlag		: 1;
+	va_start(ap, format);
 
-	unsigned int width;
-	unsigned int precision;
-
-	unsigned int hModifier		: 1;
-	unsigned int lModifier		: 1;
-} params_t;
-
-/**
- * struct specifier - Struct token
- *
- * @specifier: format token
- * @f: The function associated
- */
-typedef struct specifier
-{
-	char *specifier;
-	int (*f)(va_list, params_t *);
-} specifier_t;
-
-int _puts(char *str);
-int _putchar(int c);
-
-int print_char(va_list ap, params_t *params);
-int print_int(va_list ap, params_t *params);
-int print_string(va_list ap, params_t *params);
-int print_percent(va_list ap, params_t *params);
-int print_S(va_list ap, params_t *params);
-
-char *convert(long int num, int base, int flags, params_t *params);
-int print_unsigned(va_list ap, params_t *params);
-int print_address(va_list ap, params_t *params);
-
-int (*get_specifier(char *s))(va_list ap, params_t *params);
-int get_print_func(char *s, va_list ap, params_t *params);
-int get_flag(char *s, params_t *params);
-int get_modifier(char *s, params_t *params);
-char *get_width(char *s, params_t *params, va_list ap);
-
-int print_hex(va_list ap, params_t *params);
-int print_HEX(va_list ap, params_t *params);
-int print_binary(va_list ap, params_t *params);
-int print_octal(va_list ap, params_t *params);
-
-int print_from_to(char *start, char *stop, char *except);
-int print_rev(va_list ap, params_t *params);
-int print_rot13(va_list ap, params_t *params);
-
-int _isdigit(int c);
-int _strlen(char *s);
-int print_number(char *str, params_t *params);
-int print_number_right_shift(char *str, params_t *params);
-int print_number_left_shift(char *str, params_t *params);
-
-void init_params(params_t *params, va_list ap);
-
-char *get_precision(char *p, params_t *params, va_list ap);
-
-int _printf(const char *format, ...);
-
-#endif
-
+	if (!format || (format[0] == '%' && !format[1]))
+		return (-1);
+	if (format[0] == '%' && format[1] == ' ' && !format[2])
+		return (-1);
+	for (p = (char *)format; *p; p++)
+	{
+		init_params(&params, ap);
+		if (*p != '%')
+		{
+			total += _putchar(*p);
+			continue;
+		}
+		start = p;
+		p++;
+		while (get_flag(p, &params)) /* while char at p is flag char */
+		{
+			p++; /* next char */
+		}
+		p = get_width(p, &params, ap);
+		p = get_precision(p, &params, ap);
+		if (get_modifier(p, &params))
+			p++;
+		if (!get_specifier(p))
+			total += print_from_to(start, p,
+				params.lModifier || params.hModifier ? p - 1 : 0);
+		else
+			total += get_print_func(p, ap, &params);
+	}
+	_putchar(BUFFER_FLUSH);
+	va_end(ap);
+	return (total);
+}
