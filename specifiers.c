@@ -1,10 +1,10 @@
 #include "main.h"
 
 /**
- * get_specifier - finds the format func
- * @s: the format string
+ * get_specifier - finds format function
+ * @s: format string
  *
- * Return: the number of bytes printed
+ * Return: bytes
  */
 int (*get_specifier(char *s))(va_list ap, params_t *params)
 {
@@ -39,49 +39,51 @@ int (*get_specifier(char *s))(va_list ap, params_t *params)
 }
 
 /**
- * get_print_func - finds the format func
- * @s: the format string
+ * get_print_func - finds the format function
+ * @s: format string
  * @ap: argument pointer
- * @params: the parameters struct
+ * @params: parameters structure
  *
- * Return: the number of bytes printed
+ * Return: bytes
  */
 int get_print_func(char *s, va_list ap, params_t *params)
 {
 	int (*f)(va_list, params_t *) = get_specifier(s);
 
 	if (f)
+	{
 		return (f(ap, params));
+	}
 	return (0);
 }
 
 /**
- * get_flag - finds the flag func
- * @s: the format string
- * @params: the parameters struct
+ * get_flag - finds flag function
+ * @s: format string
+ * @params: parameters structure
  *
- * Return: if flag was valid
+ * Return: int
  */
 int get_flag(char *s, params_t *params)
 {
-	int i = 0;
+	int d = 0;
 
 	switch (*s)
 	{
 		case '+':
-			i = params->plusFlag = 1;
+			d = params->plusFlag = 1;
 			break;
 		case ' ':
-			i = params->spaceFlag = 1;
+			d = params->spaceFlag = 1;
 			break;
 		case '#':
-			i = params->hashtagFlag = 1;
+			d = params->hashtagFlag = 1;
 			break;
 		case '-':
-			i = params->minusFlag = 1;
+			d = params->minusFlag = 1;
 			break;
 		case '0':
-			i = params->zeroFlag = 1;
+			d = params->zeroFlag = 1;
 			break;
 	}
 	return (i);
@@ -96,18 +98,18 @@ int get_flag(char *s, params_t *params)
  */
 int get_modifier(char *s, params_t *params)
 {
-	int i = 0;
+	int b = 0;
 
 	switch (*s)
 	{
 	case 'h':
-		i = params->hModifier = 1;
+		b = params->hModifier = 1;
 		break;
 	case 'l':
-		i = params->lModifier = 1;
+		b = params->lModifier = 1;
 		break;
 	}
-	return (i);
+	return (b);
 }
 
 /**
