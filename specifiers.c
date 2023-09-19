@@ -86,7 +86,7 @@ int get_flag(char *s, params_t *params)
 			d = params->zeroFlag = 1;
 			break;
 	}
-	return (i);
+	return (d);
 }
 
 /**
